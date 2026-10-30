@@ -1,0 +1,98 @@
+@PrestQR_API_HostAddress = http://localhost:5279
+
+### ---------- Equipos ----------
+
+GET {{PrestQR_API_HostAddress}}/api/equipos
+Accept: application/json
+
+###
+
+GET {{PrestQR_API_HostAddress}}/api/equipos?estado=disponible
+Accept: application/json
+
+###
+
+POST {{PrestQR_API_HostAddress}}/api/equipos
+Content-Type: application/json
+
+{
+  "codigoQr": "LAP-001",
+  "nombre": "Laptop #001",
+  "modelo": "Dell Latitude 5440"
+}
+
+###
+
+# Escaneo de QR
+GET {{PrestQR_API_HostAddress}}/api/equipos/qr/LAP-001
+Accept: application/json
+
+###
+
+PUT {{PrestQR_API_HostAddress}}/api/equipos/1
+Content-Type: application/json
+
+{
+  "nombre": "Laptop #001",
+  "modelo": "Dell Latitude 5450"
+}
+
+### ---------- Alumnos ----------
+
+POST {{PrestQR_API_HostAddress}}/api/alumnos
+Content-Type: application/json
+
+{
+  "email": "alumno.prueba@prestqr.local",
+  "password": "Prueba123!",
+  "matricula": "A0001",
+  "nombre": "Alumno de Prueba",
+  "carrera": "Ingeniería en Software"
+}
+
+###
+
+GET {{PrestQR_API_HostAddress}}/api/alumnos?buscar=prueba
+Accept: application/json
+
+###
+
+GET {{PrestQR_API_HostAddress}}/api/alumnos/1/prestamos
+Accept: application/json
+
+###
+
+PATCH {{PrestQR_API_HostAddress}}/api/alumnos/1/activo
+Content-Type: application/json
+
+{
+  "activo": true
+}
+
+### ---------- Préstamos ----------
+
+POST {{PrestQR_API_HostAddress}}/api/prestamos
+Content-Type: application/json
+
+{
+  "equipoId": 1,
+  "alumnoId": 1,
+  "fechaLimite": "2026-11-05",
+  "observaciones": "Incluye cargador"
+}
+
+###
+
+GET {{PrestQR_API_HostAddress}}/api/prestamos?estado=activo
+Accept: application/json
+
+###
+
+GET {{PrestQR_API_HostAddress}}/api/prestamos?vencidos=true
+Accept: application/json
+
+###
+
+POST {{PrestQR_API_HostAddress}}/api/prestamos/1/devolucion
+
+###
