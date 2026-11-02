@@ -6,11 +6,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>PrestQR_API</RootNamespace>
     <UserSecretsId>ec45d699-a26b-43d1-add9-d11fbf802ccd</UserSecretsId>
+     <UseAppHost>false</UseAppHost>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.2.0" />
     <PackageReference Include="Dapper" Version="2.1.89" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.13" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.13" />
     <PackageReference Include="Npgsql" Version="10.0.3" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="10.3.1" />

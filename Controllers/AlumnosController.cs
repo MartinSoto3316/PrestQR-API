@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PrestQR_API.Models.DTOs;
 using PrestQR_API.Models.Entities;
@@ -6,6 +7,7 @@ using PrestQR_API.Services;
 namespace PrestQR_API.Controllers
 {
     [ApiController]
+    [Authorize(Roles = Roles.Admin)]
     [Route("api/alumnos")]
     public class AlumnosController : ControllerBase
     {

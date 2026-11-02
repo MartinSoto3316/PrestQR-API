@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PrestQR_API.Auth;
 using PrestQR_API.Models.DTOs;
 using PrestQR_API.Models.Entities;
 using PrestQR_API.Services;
@@ -10,16 +12,15 @@ namespace PrestQR_API.Controllers
     /// La devolución es una acción de negocio con su propia ruta.
     /// </summary>
     [ApiController]
+    [Authorize(Roles = Roles.Admin)]
     [Route("api/prestamos")]
     public class PrestamosController : ControllerBase
     {
         private readonly IPrestamoService _prestamoService;
-        private readonly IConfiguration _configuration;
 
-        public PrestamosController(IPrestamoService prestamoService, IConfiguration configuration)
+        public PrestamosController(IPrestamoService prestamoService)
         {
             _prestamoService = prestamoService;
-            _configuration = configuration;
         }
 
         /// <summary>
@@ -41,7 +42,8 @@ namespace PrestQR_API.Controllers
         [HttpPost]
         public async Task<ActionResult<Prestamo>> Registrar(CrearPrestamoRequest request)
         {
-            var prestamo = await _prestamoService.RegistrarAsync(request, ObtenerAdminId());
+            // El préstamo queda a nombre del administrador que inició sesión.
+            var prestamo = await _prestamoService.RegistrarAsync(request, User.ObtenerUsuarioId());
             return CreatedAtAction(nameof(ObtenerPorId), new { id = prestamo.Id }, prestamo);
         }
 
@@ -50,13 +52,6 @@ namespace PrestQR_API.Controllers
         public async Task<ActionResult<Prestamo>> RegistrarDevolucion(int id)
         {
             return Ok(await _prestamoService.RegistrarDevolucionAsync(id));
-        }
-
-        // Temporal hasta tener login: cuando agreguemos JWT, el id saldrá del token del administrador.
-        private int ObtenerAdminId()
-        {
-            return _configuration.GetValue<int?>("PrestQR:AdminIdTemporal")
-                ?? throw new InvalidOperationException("Falta configurar PrestQR:AdminIdTemporal.");
         }
     }
 }

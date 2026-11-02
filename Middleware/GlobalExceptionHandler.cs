@@ -6,7 +6,7 @@ namespace PrestQR_API.Middleware
 {
     /// <summary>
     /// Convierte las excepciones de la API y de PostgreSQL en respuestas HTTP
-    /// con formato ProblemDetails, para que el cliente reciba 400/404/409 en vez de 500.
+    /// con formato ProblemDetails, para que el cliente reciba 400/401/404/409 en vez de 500.
     /// </summary>
     public class GlobalExceptionHandler : IExceptionHandler
     {
@@ -23,6 +23,7 @@ namespace PrestQR_API.Middleware
         {
             var (status, mensaje) = exception switch
             {
+                NoAutorizadoException e => (StatusCodes.Status401Unauthorized, e.Message),
                 NoEncontradoException e => (StatusCodes.Status404NotFound, e.Message),
                 ReglaNegocioException e => (StatusCodes.Status409Conflict, e.Message),
                 ValidacionException e => (StatusCodes.Status400BadRequest, e.Message),
@@ -87,6 +88,7 @@ namespace PrestQR_API.Middleware
         private static string TituloPara(int status) => status switch
         {
             StatusCodes.Status400BadRequest => "Solicitud inválida",
+            StatusCodes.Status401Unauthorized => "No autorizado",
             StatusCodes.Status404NotFound => "No encontrado",
             StatusCodes.Status409Conflict => "Conflicto",
             _ => "Error del servidor"

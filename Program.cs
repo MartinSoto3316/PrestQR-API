@@ -1,5 +1,10 @@
+using System.Text;
 using Dapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
 using Npgsql;
+using PrestQR_API.Auth;
 using PrestQR_API.Data;
 using PrestQR_API.Middleware;
 using PrestQR_API.Repositories;
@@ -17,7 +22,47 @@ namespace PrestQR_API
 
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-            builder.Services.AddOpenApi();
+            builder.Services.AddOpenApi(options => options.AddDocumentTransformer((document, context, cancellationToken) =>
+            {
+                // Botón "Authorize" en Swagger: se pega el token del login y se envía en todas las peticiones.
+                document.Components ??= new OpenApiComponents();
+                document.Components.SecuritySchemes ??= new Dictionary<string, IOpenApiSecurityScheme>();
+                document.Components.SecuritySchemes["Bearer"] = new OpenApiSecurityScheme
+                {
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    BearerFormat = "JWT",
+                    Description = "Token obtenido en POST /api/auth/login"
+                };
+                document.Security = [new OpenApiSecurityRequirement { [new OpenApiSecuritySchemeReference("Bearer", document)] = [] }];
+                return Task.CompletedTask;
+            }));
+
+            // Autenticación con JWT: cada petición protegida debe traer "Authorization: Bearer {token}".
+            var jwt = builder.Configuration.GetSection(JwtOpciones.Seccion).Get<JwtOpciones>() ?? new JwtOpciones();
+            if (Encoding.UTF8.GetByteCount(jwt.Clave) < 32)
+            {
+                throw new InvalidOperationException(
+                    "Falta 'Jwt:Clave' o tiene menos de 32 caracteres. En desarrollo va en appsettings.Development.json; en el hosting, en la variable de entorno Jwt__Clave.");
+            }
+            builder.Services.Configure<JwtOpciones>(builder.Configuration.GetSection(JwtOpciones.Seccion));
+
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    // Conserva los nombres cortos de los claims ("sub", "role") en lugar de los de Microsoft.
+                    options.MapInboundClaims = false;
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidIssuer = jwt.Emisor,
+                        ValidAudience = jwt.Audiencia,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.Clave)),
+                        NameClaimType = ClaimsUsuario.UsuarioId,
+                        RoleClaimType = ClaimsUsuario.Rol,
+                        ClockSkew = TimeSpan.FromMinutes(1)
+                    };
+                });
+            builder.Services.AddAuthorization();
 
             // CORS: permite que la PWA (otro origen) consuma la API desde el navegador.
             // En desarrollo se acepta cualquier puerto de localhost; en producción solo los orígenes configurados.
@@ -52,8 +97,10 @@ namespace PrestQR_API
             builder.Services.AddScoped<IEquipoRepository, EquipoRepository>();
             builder.Services.AddScoped<IAlumnoRepository, AlumnoRepository>();
             builder.Services.AddScoped<IPrestamoRepository, PrestamoRepository>();
+            builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 
             // Servicios (reglas de negocio)
+            builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IEquipoService, EquipoService>();
             builder.Services.AddScoped<IAlumnoService, AlumnoService>();
             builder.Services.AddScoped<IPrestamoService, PrestamoService>();
@@ -75,8 +122,9 @@ namespace PrestQR_API
 
             app.UseCors();
 
+            // Primero se identifica al usuario (token) y después se revisa su rol.
+            app.UseAuthentication();
             app.UseAuthorization();
-
 
             app.MapControllers();
 
