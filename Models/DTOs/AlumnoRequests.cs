@@ -49,4 +49,12 @@ namespace PrestQR_API.Models.DTOs
         [Required(ErrorMessage = "Indica si la cuenta queda activa (true) o inactiva (false).")]
         public bool? Activo { get; set; }
     }
+
+    /// <summary>El administrador asigna una contraseña nueva cuando el alumno olvida la suya.</summary>
+    public class RestablecerPasswordRequest
+    {
+        [Required(ErrorMessage = "La contraseña es obligatoria.")]
+        [StringLength(100, MinimumLength = 8, ErrorMessage = "La contraseña debe tener al menos 8 caracteres.")]
+        public string Password { get; set; } = string.Empty;
+    }
 }
