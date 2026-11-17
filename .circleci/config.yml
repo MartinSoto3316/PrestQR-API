@@ -1,0 +1,49 @@
+version: 2.1
+
+jobs:
+  # 1) Integración continua: compila la API de .NET
+  build:
+    docker:
+      - image: mcr.microsoft.com/dotnet/sdk:10.0
+    steps:
+      - checkout
+      - run:
+          name: Restaurar dependencias
+          command: dotnet restore "PrestQR API.csproj"
+      - run:
+          name: Compilar la API
+          command: dotnet build "PrestQR API.csproj" -c Release --no-restore
+
+  # 2) Verifica que la imagen Docker (la que usa Render) se construye bien
+  docker-build:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Construir imagen Docker
+          command: docker build -t prestqr-api .
+
+  # 3) Despliegue continuo: le pide a Render que despliegue la nueva versión
+  deploy:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - run:
+          name: Desplegar en Render
+          command: curl -fsS -X POST "$RENDER_DEPLOY_HOOK_URL"
+
+workflows:
+  build-and-deploy:
+    jobs:
+      - build
+      - docker-build:
+          requires:
+            - build
+      - deploy:
+          requires:
+            - docker-build
+          filters:
+            branches:
+              only: main
