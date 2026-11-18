@@ -25,6 +25,7 @@ namespace PrestQR_API.Models.DTOs
         public string? Carrera { get; set; }
     }
 
+    cambio para que el codigo falle )[]
     public class ActualizarAlumnoRequest
     {
         [Required(ErrorMessage = "El email es obligatorio.")]
