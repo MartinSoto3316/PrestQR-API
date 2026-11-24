@@ -61,6 +61,7 @@ namespace PrestQR_API
                         RoleClaimType = ClaimsUsuario.Rol,
                         ClockSkew = TimeSpan.FromMinutes(1)
                     };
+                    options.Events = RespuestasAuth.Eventos();
                 });
             builder.Services.AddAuthorization();
 
@@ -98,9 +99,11 @@ namespace PrestQR_API
             builder.Services.AddScoped<IAlumnoRepository, AlumnoRepository>();
             builder.Services.AddScoped<IPrestamoRepository, PrestamoRepository>();
             builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+            builder.Services.AddScoped<IEstadisticasRepository, EstadisticasRepository>();
 
             // Servicios (reglas de negocio)
             builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<IEstadisticasService, EstadisticasService>();
             builder.Services.AddScoped<IEquipoService, EquipoService>();
             builder.Services.AddScoped<IAlumnoService, AlumnoService>();
             builder.Services.AddScoped<IPrestamoService, PrestamoService>();

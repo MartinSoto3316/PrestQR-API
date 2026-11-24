@@ -71,6 +71,14 @@ namespace PrestQR_API.Services
             return await ObtenerAsync(id);
         }
 
+        public async Task RestablecerPasswordAsync(int id, string password)
+        {
+            if (!await _alumnos.CambiarPasswordAsync(id, BCrypt.Net.BCrypt.HashPassword(password)))
+            {
+                throw new NoEncontradoException($"El alumno {id} no existe.");
+            }
+        }
+
         private static string NormalizarEmail(string email) => email.Trim().ToLowerInvariant();
     }
 }

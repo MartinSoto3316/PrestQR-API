@@ -71,5 +71,20 @@ namespace PrestQR_API.Repositories
                 new { Id = id, Activo = activo });
             return filas > 0;
         }
+
+        public async Task<bool> CambiarPasswordAsync(int id, string passwordHash)
+        {
+            await using var conn = _dataSource.CreateConnection();
+            var filas = await conn.ExecuteAsync(
+                """
+                UPDATE public.usuarios u
+                   SET password_hash = @PasswordHash
+                  FROM public.alumnos a
+                 WHERE a.usuario_id = u.id
+                   AND a.id = @Id
+                """,
+                new { Id = id, PasswordHash = passwordHash });
+            return filas > 0;
+        }
     }
 }

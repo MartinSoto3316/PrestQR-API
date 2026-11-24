@@ -11,5 +11,6 @@ namespace PrestQR_API.Services
         Task<Alumno> CrearAsync(CrearAlumnoRequest request);
         Task<Alumno> ActualizarAsync(int id, ActualizarAlumnoRequest request);
         Task<Alumno> CambiarActivoAsync(int id, bool activo);
+        Task RestablecerPasswordAsync(int id, string password);
     }
 }

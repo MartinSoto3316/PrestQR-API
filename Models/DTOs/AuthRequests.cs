@@ -9,6 +9,7 @@ namespace PrestQR_API.Models.DTOs
         public string Email { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "La contraseña es obligatoria.")]
+        [StringLength(100, ErrorMessage = "La contraseña no puede tener más de 100 caracteres.")]
         public string Password { get; set; } = string.Empty;
     }
 

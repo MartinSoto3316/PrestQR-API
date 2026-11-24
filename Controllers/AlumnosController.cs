@@ -57,5 +57,13 @@ namespace PrestQR_API.Controllers
         {
             return Ok(await _alumnoService.CambiarActivoAsync(id, request.Activo!.Value));
         }
+
+        /// <summary>Asigna una contraseña nueva al alumno (por ejemplo, si olvidó la suya).</summary>
+        [HttpPatch("{id:int}/password")]
+        public async Task<IActionResult> RestablecerPassword(int id, RestablecerPasswordRequest request)
+        {
+            await _alumnoService.RestablecerPasswordAsync(id, request.Password);
+            return NoContent();
+        }
     }
 }
